@@ -12,7 +12,7 @@ import time
 This is a helper class for managing testsuites and their test results
 Currently, the results are a dictionary of {"testsuite":{"testname":[values], ...}} 
 """
-class dzResult(object):
+class DatazillaResult(object):
     def __init__(self, results={}):
       self.results = results
     
@@ -46,7 +46,7 @@ class dzResult(object):
 """
 Datazilla request object that manages test information and submission
 """
-class dzRequest(object):
+class DatazillaRequest(object):
     def __init__(self, server, machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
                  test_date=int(time.time())):
@@ -61,13 +61,13 @@ class dzRequest(object):
         self.branch = branch
         self.id = id
         self.test_date = test_date
-        self.results = dzResult()   
+        self.results = DatazillaResult()   
         
     """
-    Join a dzResult object to the results
+    Join a DatazillaResult object to the results
     """
-    def add_dzresult(self, dzres):
-        self.results.join_results(dzres.results)
+    def add_datazilla_result(self, res):
+        self.results.join_results(res.results)
 
     """
     Submit test data to datazilla server
