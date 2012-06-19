@@ -107,4 +107,5 @@ class DatazillaRequest(object):
         for dataset in datasets:
             data = {"data": json.dumps(dataset)}
             req = urllib2.Request(self.server, urllib.urlencode(data))
+            urllib2.urlopen(req)
 
