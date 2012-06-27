@@ -44,7 +44,8 @@ class DatazillaResult(object):
                 self.results[suite] = results[suite]
 
 """
-Datazilla request object that manages test information and submission
+Datazilla request object that manages test information and submission.
+Note that the revision id can be 16 characters, maximum.
 """
 class DatazillaRequest(object):
     def __init__(self, server, machine_name="", os="", os_version="", platform="",
@@ -86,7 +87,7 @@ class DatazillaRequest(object):
             'test_build' : {
                 'name': self.build_name,
                 'version': self.version,
-                'revision': self.revision,
+                'revision': self.revision[:16],
                 'branch': self.branch,
                 'id': self.id
             },
