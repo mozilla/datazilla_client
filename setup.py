@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup
 
 version = '0.2.1'
 
@@ -26,7 +26,6 @@ setup(name='datazilla',
       url='https://github.com/mozilla/datazilla_client',
       license='MPL',
       packages=['datazilla'],
-      include_package_data=True,
       zip_safe=False,
       install_requires=deps,
       )
