@@ -8,34 +8,31 @@ import urllib2
 import json
 import time
 
-"""
-This is a helper class for managing testsuites and their test results
-Currently, the results are a dictionary of {"testsuite":{"testname":[values], ...}} 
-"""
 class DatazillaResult(object):
-    def __init__(self, results={}):
-      self.results = results
-    
     """
-    Add a testsuite of {"testname":[values],...} to the results
+    A helper class for managing testsuites and their test results.
+
+    Currently, the results are a dictionary of
+    {"testsuite":{"testname":[values], ...}}
+
     """
-    def add_testsuite(self, suite_name, results={}):
-        self.results[suite_name] = results
-        
-    """
-    Adds a list of result values to the results in the given testsuite/testname pair 
-    """
+    def __init__(self, results=None):
+        self.results = results or {}
+
+    def add_testsuite(self, suite_name, results=None):
+        """Add a testsuite of {"testname":[values],...} to the results."""
+        self.results[suite_name] = results or {}
+
     def add_test_results(self, suite_name, test_name, values):
+        """Add a list of result values to the given testsuite/testname pair."""
         if self.results.has_key(suite_name):
             if self.results[suite_name].has_key(test_name):
                 self.results[suite_name][test_name].extend(values)
             else:
                 self.results[suite_name][test_name] = values
 
-    """
-    Add a dictionary of {"testsuite":{"testname":[values], ...}} to the results
-    """
     def join_results(self, results):
+        """Add a dictionary of {"suite":{"name":[values], ...}} to results."""
         for suite in results:
              if self.results.has_key(suite):
                 for test in results[suite]:
@@ -43,14 +40,17 @@ class DatazillaResult(object):
              else:
                 self.results[suite] = results[suite]
 
-"""
-Datazilla request object that manages test information and submission.
-Note that the revision id can be 16 characters, maximum.
-"""
+
 class DatazillaRequest(object):
+    """
+    Datazilla request object that manages test information and submission.
+
+    Note that the revision id can be 16 characters, maximum.
+
+    """
     def __init__(self, server, machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
-                 test_date=int(time.time())):
+                 test_date=None):
         self.server = server
         self.machine_name = machine_name
         self.os = os
@@ -61,19 +61,17 @@ class DatazillaRequest(object):
         self.revision = revision
         self.branch = branch
         self.id = id
+        if test_date is None:
+            test_date = int(time.time())
         self.test_date = test_date
-        self.results = DatazillaResult()   
-        
-    """
-    Join a DatazillaResult object to the results
-    """
+        self.results = DatazillaResult()
+
     def add_datazilla_result(self, res):
+        """Join a DatazillaResult object to the results."""
         self.results.join_results(res.results)
 
-    """
-    Submit test data to datazilla server
-    """
     def submit(self):
+        """Submit test data to datazilla server."""
         if self.server is None:
             raise "Data server is not set!"
 
@@ -99,8 +97,8 @@ class DatazillaRequest(object):
         }
 
         datasets = []
-        for suite, data in self.results.results.items(): 
-            perf_json['testrun']['suite'] = suite 
+        for suite, data in self.results.results.items():
+            perf_json['testrun']['suite'] = suite
             perf_json['results'] = data;
             datasets.append(deepcopy(perf_json))
             perf_json['results'] = {}
