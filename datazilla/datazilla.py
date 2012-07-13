@@ -25,20 +25,15 @@ class DatazillaResult(object):
 
     def add_test_results(self, suite_name, test_name, values):
         """Add a list of result values to the given testsuite/testname pair."""
-        if self.results.has_key(suite_name):
-            if self.results[suite_name].has_key(test_name):
-                self.results[suite_name][test_name].extend(values)
-            else:
-                self.results[suite_name][test_name] = values
+        suite = self.results.setdefault("suite", {})
+        suite.setdefault(test_name, []).extend(values)
 
     def join_results(self, results):
         """Add a dictionary of {"suite":{"name":[values], ...}} to results."""
-        for suite in results:
-             if self.results.has_key(suite):
-                for test in results[suite]:
-                    self.results[suite][test].extend(results[suite][test])
-             else:
-                self.results[suite] = results[suite]
+        for suite_name, tests in results.items():
+            suite = self.results.setdefault(suite_name, {})
+            for test_name, values in tests.items():
+                suite.setdefault(test_name, []).extend(values)
 
 
 class DatazillaRequest(object):
@@ -48,7 +43,8 @@ class DatazillaRequest(object):
     Note that the revision id can be 16 characters, maximum.
 
     """
-    def __init__(self, server, machine_name="", os="", os_version="", platform="",
+    def __init__(self,
+                 server, machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
                  test_date=None):
         self.server = server
@@ -72,9 +68,6 @@ class DatazillaRequest(object):
 
     def submit(self):
         """Submit test data to datazilla server."""
-        if self.server is None:
-            raise "Data server is not set!"
-
         perf_json = {
             'test_machine' : {
                 'name': self.machine_name,
@@ -104,7 +97,15 @@ class DatazillaRequest(object):
             perf_json['results'] = {}
 
         for dataset in datasets:
-            data = {"data": json.dumps(dataset)}
-            req = urllib2.Request(self.server, urllib.urlencode(data))
-            urllib2.urlopen(req)
+            self.send(dataset)
 
+
+    def send(self, dataset):
+        """Send given dataset to server."""
+        data = {"data": json.dumps(dataset)}
+        req = urllib2.Request(
+            self.server,
+            urllib.urlencode(data),
+            {'Content-Type': 'application/x-www-form-urlencoded'},
+            )
+        urllib2.urlopen(req)

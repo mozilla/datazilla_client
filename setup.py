@@ -2,7 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import sys
 from setuptools import setup
 
 version = '0.2.1'
@@ -28,4 +27,6 @@ setup(name='datazilla',
       packages=['datazilla'],
       zip_safe=False,
       install_requires=deps,
+      test_suite='datazilla.tests',
+      tests_require=["mock"],
       )

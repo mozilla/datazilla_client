@@ -26,3 +26,9 @@ Usage
         )
     req.add_datazilla_result(res)
     req.submit()
+
+
+Development
+-----------
+
+To run the `datazilla_client` test suite, run `python setup.py test`.
