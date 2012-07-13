@@ -27,6 +27,13 @@ Usage
     req.add_datazilla_result(res)
     req.submit()
 
+If you don't want to use `DatazillaResult` to build up the data structure to
+send, you can still use `DatazillaRequest` to send it:
+
+    req = DatazillaRequest("datazilla.mozilla.org/project/api/load_test")
+    data_to_send = ...
+    req.send(data_to_send)
+
 
 Development
 -----------
