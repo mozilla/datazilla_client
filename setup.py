@@ -6,7 +6,7 @@ from setuptools import setup
 
 version = '0.2.1'
 
-deps = []
+deps = ['oauth2']
 
 try:
     import json

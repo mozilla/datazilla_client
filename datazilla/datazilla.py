@@ -3,10 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from copy import deepcopy
-import urllib
-import urllib2
+import httplib
 import json
+import oauth2 as oauth
 import time
+import urllib
+from urlparse import urlparse
+
+
 
 class DatazillaResult(object):
     """
@@ -43,11 +47,14 @@ class DatazillaRequest(object):
     Note that the revision id can be 16 characters, maximum.
 
     """
-    def __init__(self,
-                 server, machine_name="", os="", os_version="", platform="",
+    def __init__(self, host, project, oauth_key, oauth_secret,
+                 machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
                  test_date=None):
-        self.server = server
+        self.host = host
+        self.project = project
+        self.oauth_key = oauth_key
+        self.oauth_secret = oauth_secret
         self.machine_name = machine_name
         self.os = os
         self.os_version = os_version
@@ -67,7 +74,7 @@ class DatazillaRequest(object):
         self.results.join_results(res.results)
 
     def submit(self):
-        """Submit test data to datazilla server."""
+        """Submit test data to datazilla server, return list of responses."""
         perf_json = {
             'test_machine' : {
                 'name': self.machine_name,
@@ -96,16 +103,47 @@ class DatazillaRequest(object):
             datasets.append(deepcopy(perf_json))
             perf_json['results'] = {}
 
+        responses = []
         for dataset in datasets:
-            self.send(dataset)
+            responses.append(self.send(dataset))
+
+        return responses
 
 
     def send(self, dataset):
-        """Send given dataset to server."""
-        data = {"data": json.dumps(dataset)}
-        req = urllib2.Request(
-            self.server,
-            urllib.urlencode(data),
-            {'Content-Type': 'application/x-www-form-urlencoded'},
-            )
-        urllib2.urlopen(req)
+        """Send given dataset to server; returns httplib Response."""
+        path = "/%s/api/load_test" % (self.project)
+        uri = "http://%s%s" % (self.host, path)
+        user = self.project
+
+        params = {
+            'oauth_version': "1.0",
+            'oauth_nonce': oauth.generate_nonce(),
+            'oauth_timestamp': int(time.time()),
+            'user': user,
+            'data': urllib.quote(json.dumps(dataset)),
+        }
+
+        #There is no requirement for the token in two-legged
+        #OAuth but we still need the token object.
+        token = oauth.Token(key="", secret="")
+        consumer = oauth.Consumer(key=self.oauth_key, secret=self.oauth_secret)
+
+        params['oauth_token'] = token.key
+        params['oauth_consumer_key'] = consumer.key
+
+        req = oauth.Request(method="POST", url=uri, parameters=params)
+
+        #Set the signature
+        signature_method = oauth.SignatureMethod_HMAC_SHA1()
+
+        #Sign the request
+        req.sign_request(signature_method, consumer, token)
+
+        #Build the header
+        header = {'Content-type': 'application/x-www-form-urlencoded'}
+
+        conn = httplib.HTTPConnection(self.host)
+
+        conn.request("POST", path, req.to_postdata(), header)
+        return conn.getresponse()

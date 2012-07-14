@@ -9,14 +9,15 @@ from ..datazilla import DatazillaRequest, DatazillaResult
 class DatazillaRequestTest(TestCase):
     def test_init_with_date(self):
         """Can provide test date on instantiation."""
-        req = DatazillaRequest('server', test_date=12345)
+        req = DatazillaRequest(
+            'host', 'project', 'key', 'secret', test_date=12345)
 
         self.assertEqual(req.test_date, 12345)
 
 
     def test_add_datazilla_result(self):
         """Can add a DatazillaResult to a DatazillaRequest."""
-        req = DatazillaRequest('server')
+        req = DatazillaRequest('host', 'project', 'key', 'secret')
         res = DatazillaResult({'suite': {'test': [1, 2, 3]}})
 
         req.add_datazilla_result(res)
@@ -26,7 +27,7 @@ class DatazillaRequestTest(TestCase):
 
     def test_add_second_datazilla_result(self):
         """Adding a second DatazillaResult joins their results."""
-        req = DatazillaRequest('server')
+        req = DatazillaRequest('host', 'project', 'key', 'secret')
         res1 = DatazillaResult({'suite1': {'test': [1]}})
         res2 = DatazillaResult({'suite2': {'test': [2]}})
 
@@ -43,7 +44,10 @@ class DatazillaRequestTest(TestCase):
     def test_submit(self, mock_send):
         """Submits blob of JSON data for each test suite."""
         req = DatazillaRequest(
-            server='datazilla.mozilla.org/project/api/load_test',
+            host='host',
+            project='project',
+            oauth_key='key',
+            oauth_secret='secret',
             machine_name='qm-pxp01',
             os='linux',
             os_version='Ubuntu 11.10',
@@ -103,23 +107,40 @@ class DatazillaRequestTest(TestCase):
         self.assertEqual(data1['testrun']['date'], req.test_date)
 
 
-    @patch("datazilla.datazilla.urllib2.urlopen")
-    def test_send(self, mock_urlopen):
+    @patch("datazilla.datazilla.oauth.generate_nonce")
+    @patch("datazilla.datazilla.oauth.time.time")
+    @patch("datazilla.datazilla.httplib.HTTPConnection")
+    def test_send(self,
+                  mock_HTTPConnection, mock_time, mock_generate_nonce):
         """Can send data to the server."""
-        server = "datazilla.mozilla.org/project/api/load_test"
-        req = DatazillaRequest(server)
+        mock_time.return_value = 1342229050
+        mock_generate_nonce.return_value = "46810593"
 
-        req.send({"some": "data"})
+        host = "datazilla.mozilla.org"
+        project = "project"
+        key = "oauth-key"
+        secret = "oauth-secret"
+        req = DatazillaRequest(host, project, key, secret)
 
-        self.assertEqual(mock_urlopen.call_count, 1)
-        request = mock_urlopen.call_args[0][0]
+        mock_conn = mock_HTTPConnection.return_value
+        mock_request = mock_conn.request
+        mock_response = mock_conn.getresponse.return_value
 
-        self.assertEqual(request.get_full_url(), server)
+        response = req.send({"some": "data"})
+
+        self.assertEqual(mock_HTTPConnection.call_count, 1)
+        self.assertEqual(mock_HTTPConnection.call_args[0][0], host)
+
+        self.assertEqual(mock_response, response)
+
+        self.assertEqual(mock_request.call_count, 1)
+
+        method, path, data, header = mock_request.call_args[0]
+        self.assertEqual(method, "POST")
+        self.assertEqual(path, "/project/api/load_test")
+        self.assertEqual(data, 'oauth_body_hash=2jmj7l5rSw0yVb%2FvlWAYkK%2FYBwk%3D&oauth_nonce=46810593&oauth_timestamp=1342229050&oauth_consumer_key=oauth-key&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=&user=project&oauth_signature=mKpovMfgWJqlcVKSdcTCbw4gfaM%3D&data=%257B%2522some%2522%253A%2520%2522data%2522%257D')
 
         self.assertEqual(
-            request.get_data(), 'data=%7B%22some%22%3A+%22data%22%7D')
-
-        self.assertEqual(
-            request.headers['Content-type'],
+            header['Content-type'],
             'application/x-www-form-urlencoded',
             )

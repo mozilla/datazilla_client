@@ -13,7 +13,10 @@ Usage
     res.add_test_results("suite_name", "another_test", [2, 3, 4])
     
     req = DatazillaRequest(
-        server="datazilla.mozilla.org/project/api/load_test",
+        host="datazilla.mozilla.org",
+        project="project",
+        oauth_key="oauth-key",
+        oauth_secret="oauth-secret",
         machine_name="qm-pxp01",
         os="linux",
         os_version="Ubuntu 11.10",
@@ -27,10 +30,18 @@ Usage
     req.add_datazilla_result(res)
     req.submit()
 
+The OAuth key and secret for your project should be supplied to you by the
+Datazilla team.
+
 If you don't want to use `DatazillaResult` to build up the data structure to
 send, you can still use `DatazillaRequest` to send it:
 
-    req = DatazillaRequest("datazilla.mozilla.org/project/api/load_test")
+    req = DatazillaRequest(
+        host="datazilla.mozilla.org",
+        project="project",
+        oauth_key="oauth-key",
+        oauth_secret="oauth-secret",
+        )
     data_to_send = ...
     req.send(data_to_send)
 
