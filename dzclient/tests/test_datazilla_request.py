@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from mock import patch
 
-from ..datazilla import DatazillaRequest, DatazillaResult
+from dzclient import DatazillaRequest, DatazillaResult
 
 
 
@@ -107,9 +107,9 @@ class DatazillaRequestTest(TestCase):
         self.assertEqual(data1['testrun']['date'], req.test_date)
 
 
-    @patch("datazilla.datazilla.oauth.generate_nonce")
-    @patch("datazilla.datazilla.oauth.time.time")
-    @patch("datazilla.datazilla.httplib.HTTPConnection")
+    @patch("dzclient.client.oauth.generate_nonce")
+    @patch("dzclient.client.oauth.time.time")
+    @patch("dzclient.client.httplib.HTTPConnection")
     def test_send(self,
                   mock_HTTPConnection, mock_time, mock_generate_nonce):
         """Can send data to the server."""

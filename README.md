@@ -6,7 +6,7 @@ Client libraries to interact with the datazilla database.
 Usage
 -----
 
-    from datazilla import DatazillaRequest, DatazillaResult
+    from dzclient import DatazillaRequest, DatazillaResult
     
     res = DatazillaResult()
     res.add_testsuite("suite_name", {"test_name": [1, 2, 3]})

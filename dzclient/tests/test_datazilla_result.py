@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from ..datazilla import DatazillaResult
+from dzclient import DatazillaResult
 
 
 
