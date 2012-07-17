@@ -25,7 +25,7 @@ class DatazillaResult(object):
 
     def add_test_results(self, suite_name, test_name, values):
         """Add a list of result values to the given testsuite/testname pair."""
-        suite = self.results.setdefault("suite", {})
+        suite = self.results.setdefault(suite_name, {})
         suite.setdefault(test_name, []).extend(values)
 
     def join_results(self, results):
