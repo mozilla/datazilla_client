@@ -2,12 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import sys
 from setuptools import setup
 
 version = '0.2.1'
 
-deps = []
+deps = ['oauth2']
 
 try:
     import json
@@ -25,7 +24,9 @@ setup(name='datazilla',
       author_email='mdas@mozilla.com',
       url='https://github.com/mozilla/datazilla_client',
       license='MPL',
-      packages=['datazilla'],
+      packages=['dzclient'],
       zip_safe=False,
       install_requires=deps,
+      test_suite='dzclient.tests',
+      tests_require=["mock"],
       )
