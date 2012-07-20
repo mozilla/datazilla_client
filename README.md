@@ -50,3 +50,7 @@ Development
 -----------
 
 To run the `datazilla_client` test suite, run `python setup.py test`.
+
+If you have `python2.5`, `python2.6`, and `python2.7` available on your system
+under those names, you can also `pip install tox` and then run `tox` to test
+`datazilla_client` under all of those Python versions.
