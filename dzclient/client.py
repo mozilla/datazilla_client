@@ -75,8 +75,9 @@ class DatazillaRequest(object):
         """Join a DatazillaResult object to the results."""
         self.results.join_results(res.results)
 
-    def submit(self):
-        """Submit test data to datazilla server, return list of responses."""
+    def datasets(self):
+        """Return the datasets in JSON serializable form"""
+
         perf_json = {
             'test_machine' : {
                 'name': self.machine_name,
@@ -93,24 +94,26 @@ class DatazillaRequest(object):
             },
             'testrun' : {
                 'date': self.test_date,
-                'suite': "",
-            },
-            'results': {},
+            }
         }
 
         datasets = []
         for suite, data in self.results.results.items():
-            perf_json['testrun']['suite'] = suite
-            perf_json['results'] = data;
-            datasets.append(deepcopy(perf_json))
-            perf_json['results'] = {}
+            dataset = deepcopy(perf_json)
+            dataset['testrun']['suite'] = suite
+            dataset['results'] = deepcopy(data)
+            datasets.append(dataset)
+
+        return datasets
+
+    def submit(self):
+        """Submit test data to datazilla server, return list of responses."""
 
         responses = []
-        for dataset in datasets:
+        for dataset in self.datasets():
             responses.append(self.send(dataset))
 
         return responses
-
 
     def send(self, dataset):
         """Send given dataset to server; returns httplib Response."""
