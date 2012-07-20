@@ -4,13 +4,15 @@
 
 from copy import deepcopy
 import httplib
-import json
 import oauth2 as oauth
 import time
 import urllib
 from urlparse import urlparse
 
-
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class DatazillaResult(object):
     """
