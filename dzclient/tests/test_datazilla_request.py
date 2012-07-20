@@ -36,6 +36,49 @@ class DatazillaRequestTest(unittest.TestCase):
             {'suite1': {'test': [1]}, 'suite2': {'test': [2]}},
             )
 
+    def test_datasets(self):
+        """Tests dataset creation for submission to datazilla"""
+
+        req = DatazillaRequest(
+            host='host',
+            project='project',
+            oauth_key='key',
+            oauth_secret='secret',
+            machine_name='qm-pxp01',
+            os='linux',
+            os_version='Ubuntu 11.10',
+            platform='x86_64',
+            build_name='Firefox',
+            version='14.0a2',
+            revision='785345035a3b',
+            branch='Mozilla-Aurora',
+            id='20120228122102',
+            )
+
+        results = {'suite1': {'test1': [1]}, 'suite2': {'test2': [2]}}
+        req.add_datazilla_result(DatazillaResult(results))
+
+        datasets = req.datasets()
+
+        self.assertEqual(len(datasets), 2)
+
+        for dataset in datasets:
+            self.assertEqual(set(dataset.keys()), set(['results', 'test_build', 'test_machine', 'testrun']))
+            self.assertEqual(dataset['test_build'],
+                             {'branch': 'Mozilla-Aurora',
+                              'id': '20120228122102',
+                              'name': 'Firefox',
+                              'revision': '785345035a3b',
+                              'version': '14.0a2'})
+            self.assertEqual(dataset['test_machine'],
+                             {'name': 'qm-pxp01',
+                              'os': 'linux',
+                              'osversion': 'Ubuntu 11.10',
+                              'platform': 'x86_64'})
+            self.assertEqual(set(dataset['testrun'].keys()), set(['suite', 'date']))
+            suite = dataset['testrun']['suite']
+            self.assertTrue(suite in results)
+            self.assertEqual(dataset['results'], results[suite])
 
     @patch.object(DatazillaRequest, 'send')
     def test_submit(self, mock_send):
