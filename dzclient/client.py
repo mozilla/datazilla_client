@@ -110,7 +110,7 @@ class DatazillaRequest(object):
         """Submit test data to datazilla server, return list of responses."""
 
         responses = []
-        for dataset in self.datasets:
+        for dataset in self.datasets():
             responses.append(self.send(dataset))
 
         return responses
