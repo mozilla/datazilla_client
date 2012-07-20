@@ -1,12 +1,9 @@
-from unittest import TestCase
-
+import unittest
 from mock import patch
-
 from dzclient import DatazillaRequest, DatazillaResult
 
 
-
-class DatazillaRequestTest(TestCase):
+class DatazillaRequestTest(unittest.TestCase):
     def test_init_with_date(self):
         """Can provide test date on instantiation."""
         req = DatazillaRequest(
@@ -144,3 +141,6 @@ class DatazillaRequestTest(TestCase):
             header['Content-type'],
             'application/x-www-form-urlencoded',
             )
+
+if __name__ == '__main__':
+    unittest.main()
