@@ -1,10 +1,8 @@
-from unittest import TestCase
-
+import unittest
 from dzclient import DatazillaResult
 
 
-
-class DatazillaResultTest(TestCase):
+class DatazillaResultTest(unittest.TestCase):
     def test_init_with_results(self):
         """Can initialize with a dictionary of results."""
         data = {"suite": {"test": [1, 2, 3]}}
@@ -54,3 +52,6 @@ class DatazillaResultTest(TestCase):
                 "suite2": {"test2a": [4]},
                 }
             )
+
+if __name__ == '__main__':
+    unittest.main()
