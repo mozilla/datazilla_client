@@ -7,11 +7,11 @@ Usage
 -----
 
     from dzclient import DatazillaRequest, DatazillaResult
-    
+
     res = DatazillaResult()
     res.add_testsuite("suite_name", {"test_name": [1, 2, 3]})
     res.add_test_results("suite_name", "another_test", [2, 3, 4])
-    
+
     req = DatazillaRequest(
         host="datazilla.mozilla.org",
         project="project",
@@ -44,6 +44,11 @@ send, you can still use `DatazillaRequest` to send it:
         )
     data_to_send = ...
     req.send(data_to_send)
+
+You may also introspect the data to be sent by the `DatazillaRequest`:
+
+    req.datasets()
+    [{'test_machine': {'platform': 'x86_64', 'osversion': 'Ubuntu 11.10', 'os': 'linux', 'name': 'qm-pxp01'}, 'testrun': {'date': 1343062245, 'suite': 'suite_name'}, 'results': {'another_test': [2, 3, 4], 'test_name': [1, 2, 3]}, 'test_build': {'version': '14.0a2', 'revision': '785345035a3b', 'id': '20120228122102', 'branch': 'Mozilla-Aurora', 'name': 'Firefox'}}]
 
 
 Development
