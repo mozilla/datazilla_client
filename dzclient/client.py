@@ -43,7 +43,7 @@ class DatazillaResult(object):
                 suite.setdefault(test_name, []).extend(values)
 
 class DatazillaResultsCollection(object):
-
+    """DatazillaResultsCollection manages test information and serialization to JSON"""
 
     def __init__(self, machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
@@ -104,7 +104,7 @@ class DatazillaResultsCollection(object):
 
 class DatazillaRequest(DatazillaResultsCollection):
     """
-    Datazilla request object that manages test information and submission.
+    Datazilla request object that manages test submission.
 
     Note that the revision id can be 16 characters, maximum.
 
@@ -115,15 +115,15 @@ class DatazillaRequest(DatazillaResultsCollection):
         """create a DatazillaRequest instance from a results collection"""
 
         # get attributes from the collection
-        attributes = inspect.getargspec(foo).args[1:]
-        kw = dict([(i, gettattr(collection, i))
+        attributes = inspect.getargspec(DatazillaResultsCollection.__init__).args[1:]
+        kw = dict([(i, getattr(collection, i))
                    for i in attributes])
 
         # create the instance
         instance = cls(host, project, oauth_key, oauth_secret, **kw)
 
         # add the results
-        instance.add_datazilla_results(collection.results)
+        instance.add_datazilla_result(collection.results)
 
         return instance
 
