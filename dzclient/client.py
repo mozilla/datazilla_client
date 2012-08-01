@@ -128,6 +128,13 @@ class DatazillaRequest(DatazillaResultsCollection):
         return instance
 
     def __init__(self, host, project, oauth_key, oauth_secret, **kw):
+        """
+        - host : datazilla host to post to
+        - project : name of the project in datazilla: http://host/project
+        - oauth_key, oauth_secret : oauth credentials
+        - **kw : arguments to DatazillaResultsCollection.__init__
+        """
+
         self.host = host
         self.project = project
         self.oauth_key = oauth_key
