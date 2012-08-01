@@ -2,11 +2,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from copy import deepcopy
+import inspect
 import httplib
 import oauth2 as oauth
 import time
 import urllib
+from copy import deepcopy
 from urlparse import urlparse
 
 try:
@@ -41,22 +42,16 @@ class DatazillaResult(object):
             for test_name, values in tests.items():
                 suite.setdefault(test_name, []).extend(values)
 
+class DatazillaResultsCollection(object):
+    """DatazillaResultsCollection manages test information and serialization to JSON"""
 
-class DatazillaRequest(object):
-    """
-    Datazilla request object that manages test information and submission.
-
-    Note that the revision id can be 16 characters, maximum.
-
-    """
-    def __init__(self, host, project, oauth_key, oauth_secret,
-                 machine_name="", os="", os_version="", platform="",
+    def __init__(self, machine_name="", os="", os_version="", platform="",
                  build_name="", version="", revision="", branch="", id="",
                  test_date=None):
-        self.host = host
-        self.project = project
-        self.oauth_key = oauth_key
-        self.oauth_secret = oauth_secret
+        """
+        - id : the build ID for which the dzresults are for; a unique identifier to which these results belong
+        """
+
         self.machine_name = machine_name
         self.os = os
         self.os_version = os_version
@@ -105,6 +100,47 @@ class DatazillaRequest(object):
             datasets.append(dataset)
 
         return datasets
+
+
+class DatazillaRequest(DatazillaResultsCollection):
+    """
+    Datazilla request object that manages test submission.
+
+    Note that the revision id can be 16 characters, maximum.
+
+    """
+
+    @classmethod
+    def create(cls, host, project, oauth_key, oauth_secret, collection):
+        """create a DatazillaRequest instance from a results collection"""
+
+        # get attributes from the collection
+        attributes = inspect.getargspec(DatazillaResultsCollection.__init__).args[1:]
+        kw = dict([(i, getattr(collection, i))
+                   for i in attributes])
+
+        # create the instance
+        instance = cls(host, project, oauth_key, oauth_secret, **kw)
+
+        # add the results
+        instance.add_datazilla_result(collection.results)
+
+        return instance
+
+    def __init__(self, host, project, oauth_key, oauth_secret, **kw):
+        """
+        - host : datazilla host to post to
+        - project : name of the project in datazilla: http://host/project
+        - oauth_key, oauth_secret : oauth credentials
+        - **kw : arguments to DatazillaResultsCollection.__init__
+        """
+
+        self.host = host
+        self.project = project
+        self.oauth_key = oauth_key
+        self.oauth_secret = oauth_secret
+        DatazillaResultsCollection.__init__(self, **kw)
+
 
     def submit(self):
         """Submit test data to datazilla server, return list of responses."""

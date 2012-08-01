@@ -1,6 +1,6 @@
 import unittest
 from mock import patch
-from dzclient import DatazillaRequest, DatazillaResult
+from dzclient import DatazillaRequest, DatazillaResult, DatazillaResultsCollection
 
 
 class DatazillaRequestTest(unittest.TestCase):
@@ -35,6 +35,19 @@ class DatazillaRequestTest(unittest.TestCase):
             req.results.results,
             {'suite1': {'test': [1]}, 'suite2': {'test': [2]}},
             )
+
+    def test_create_from_results_collection(self):
+        collection = DatazillaResultsCollection(machine_name='localhost',
+                                                os='linux')
+        test_date = collection.test_date
+        req = DatazillaRequest.create('host', 'project', 'key', 'secret', collection)
+        self.assertEqual(req.machine_name, 'localhost')
+        self.assertEqual(req.os, 'linux')
+        self.assertEqual(req.test_date, test_date)
+        self.assertEqual(req.host, 'host')
+        self.assertEqual(req.project, 'project')
+        self.assertEqual(req.oauth_key, 'key')
+        self.assertEqual(req.oauth_secret, 'secret')
 
     def test_datasets(self):
         """Tests dataset creation for submission to datazilla"""
