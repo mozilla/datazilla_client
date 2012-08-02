@@ -111,7 +111,8 @@ class DatazillaRequest(DatazillaResultsCollection):
     """
 
     @classmethod
-    def create(cls, host, project, oauth_key, oauth_secret, collection):
+    def create(cls, protocol, host, project, oauth_key,
+                oauth_secret, collection):
         """create a DatazillaRequest instance from a results collection"""
 
         # get attributes from the collection
@@ -120,14 +121,14 @@ class DatazillaRequest(DatazillaResultsCollection):
                    for i in attributes])
 
         # create the instance
-        instance = cls(host, project, oauth_key, oauth_secret, **kw)
+        instance = cls(protocol, host, project, oauth_key, oauth_secret, **kw)
 
         # add the results
         instance.add_datazilla_result(collection.results)
 
         return instance
 
-    def __init__(self, host, project, oauth_key, oauth_secret, **kw):
+    def __init__(self, protocol, host, project, oauth_key, oauth_secret, **kw):
         """
         - host : datazilla host to post to
         - project : name of the project in datazilla: http://host/project
@@ -139,6 +140,13 @@ class DatazillaRequest(DatazillaResultsCollection):
         self.project = project
         self.oauth_key = oauth_key
         self.oauth_secret = oauth_secret
+
+        if protocol in set(['http', 'https']):
+            self.protocol = protocol
+        else:
+            #Default to https
+            self.protocol = 'https'
+
         DatazillaResultsCollection.__init__(self, **kw)
 
 
@@ -154,7 +162,7 @@ class DatazillaRequest(DatazillaResultsCollection):
     def send(self, dataset):
         """Send given dataset to server; returns httplib Response."""
         path = "/%s/api/load_test" % (self.project)
-        uri = "http://%s%s" % (self.host, path)
+        uri = "%s://%s%s" % (self.protocol, self.host, path)
         user = self.project
 
         params = {
@@ -184,7 +192,11 @@ class DatazillaRequest(DatazillaResultsCollection):
         #Build the header
         header = {'Content-type': 'application/x-www-form-urlencoded'}
 
-        conn = httplib.HTTPConnection(self.host)
+        conn = None
+        if self.protocol == 'https':
+            conn = httplib.HTTPSConnection(self.host)
+        else:
+            conn = httplib.HTTPConnection(self.host)
 
         conn.request("POST", path, req.to_postdata(), header)
         return conn.getresponse()
