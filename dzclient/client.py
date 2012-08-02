@@ -193,10 +193,10 @@ class DatazillaRequest(DatazillaResultsCollection):
         header = {'Content-type': 'application/x-www-form-urlencoded'}
 
         conn = None
-        if self.protocol == 'https':
-            conn = httplib.HTTPSConnection(self.host)
-        else:
+        if self.protocol == 'http':
             conn = httplib.HTTPConnection(self.host)
+        else:
+            conn = httplib.HTTPSConnection(self.host)
 
         conn.request("POST", path, req.to_postdata(), header)
         return conn.getresponse()
