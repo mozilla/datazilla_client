@@ -34,16 +34,23 @@ class DatazillaResultTest(unittest.TestCase):
         self.assertEqual(res.results, {"suite": {"test": [1, 2, 3]}})
 
 
+    def test_add_auxiliary_results(self):
+        """Can add auxiliary results to a suite"""
+        res = DatazillaResult()
+        res.add_auxiliary_results("suite", "name", [1, 2, 3])
+        self.assertEqual(res.results_aux, {"suite": {"name": [1, 2, 3]}})
+
+
     def test_join_results(self):
         """Can merge a full results dictionary into this result."""
         res = DatazillaResult({"suite1": {"test1a": [1]}})
 
-        res.join_results(
+        res.join_results(DatazillaResult(
             {
                 "suite1": {"test1a": [2], "test1b": [3]},
                 "suite2": {"test2a": [4]},
                 }
-            )
+            ))
 
         self.assertEqual(
             res.results,
