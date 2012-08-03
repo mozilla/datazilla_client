@@ -141,7 +141,9 @@ class DatazillaRequest(DatazillaResultsCollection):
         self.oauth_key = oauth_key
         self.oauth_secret = oauth_secret
 
-        if protocol in set(['http', 'https']):
+        self.protocols = set(['http', 'https'])
+
+        if protocol in self.protocols:
             self.protocol = protocol
         else:
             #Default to https
