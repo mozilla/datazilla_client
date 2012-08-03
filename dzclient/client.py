@@ -22,25 +22,44 @@ class DatazillaResult(object):
     Currently, the results are a dictionary of
     {"testsuite":{"testname":[values], ...}}
 
-    """
-    def __init__(self, results=None):
-        self.results = results or {}
 
-    def add_testsuite(self, suite_name, results=None):
+    Each suite may also have an options dictionary
+    """
+    def __init__(self, results=None, results_aux=None, options=None):
+        self.results = results or {}
+        self.results_aux = results_aux or {}
+        self.options = options or {}
+
+    def add_testsuite(self, suite_name, results=None, results_aux=None, options=None):
         """Add a testsuite of {"testname":[values],...} to the results."""
         self.results[suite_name] = results or {}
+        self.results_aux[suite_name] = results_aux or {}
+        self.options[suite_name] = options or {}
 
     def add_test_results(self, suite_name, test_name, values):
         """Add a list of result values to the given testsuite/testname pair."""
         suite = self.results.setdefault(suite_name, {})
         suite.setdefault(test_name, []).extend(values)
 
+    def add_auxiliary_results(self, suite_name, results_name, values):
+        """Add auxiliary results for a test suite"""
+        suite = self.results_aux.setdefault(suite_name, {})
+        suite.setdefault(results_name, []).extend(values)
+
     def join_results(self, results):
-        """Add a dictionary of {"suite":{"name":[values], ...}} to results."""
-        for suite_name, tests in results.items():
+        """merge an existing DatazillaResult instance with this one"""
+
+        for suite_name, tests in results.results.items():
             suite = self.results.setdefault(suite_name, {})
             for test_name, values in tests.items():
                 suite.setdefault(test_name, []).extend(values)
+        for suite_name, results_aux in results.results_aux.items():
+            suite = self.results_aux.setdefault(suite_name, {})
+            for results_name, values in results_aux.items():
+                suite.setdefault(results_name, []).extend(values)
+        for suite_name, options in results.options.items():
+            self.options.setdefault(suite_name, {}).update(options)
+
 
 class DatazillaResultsCollection(object):
     """DatazillaResultsCollection manages test information and serialization to JSON"""
@@ -49,7 +68,16 @@ class DatazillaResultsCollection(object):
                  build_name="", version="", revision="", branch="", id="",
                  test_date=None):
         """
-        - id : the build ID for which the dzresults are for; a unique identifier to which these results belong
+        - machine_name: host name of the test machine
+        - os: name of the os of the test machine ('linux', 'win', 'mac')
+        - os_version: long string of os version
+        - platform: processor name, e.g. x86_64
+        - build_name: name of the product under test, e.g. Firefox
+        - version: version of the product under test
+        - revision: source stamp of the product, if available
+        - branch: branch of the product under test
+        - id: the build ID for which the dzresults are for; a unique identifier to which these results belong
+        - test_date: time stamp (seconds since epoch) of the test run, or now if not specified
         """
 
         self.machine_name = machine_name
@@ -68,7 +96,7 @@ class DatazillaResultsCollection(object):
 
     def add_datazilla_result(self, res):
         """Join a DatazillaResult object to the results."""
-        self.results.join_results(res.results)
+        self.results.join_results(res)
 
     def datasets(self):
         """Return the datasets in JSON serializable form"""
@@ -97,6 +125,12 @@ class DatazillaResultsCollection(object):
             dataset = deepcopy(perf_json)
             dataset['testrun']['suite'] = suite
             dataset['results'] = deepcopy(data)
+            options = self.results.options.get(suite)
+            if options:
+                dataset['testrun']['options'] = deepcopy(options)
+            results_aux = self.results.results_aux.get(suite)
+            if results_aux:
+                dataset['results_aux'] = deepcopy(results_aux)
             datasets.append(dataset)
 
         return datasets
