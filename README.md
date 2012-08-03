@@ -13,6 +13,7 @@ Usage
     res.add_test_results("suite_name", "another_test", [2, 3, 4])
 
     req = DatazillaRequest(
+        protocol="https",
         host="datazilla.mozilla.org",
         project="project",
         oauth_key="oauth-key",
@@ -37,6 +38,7 @@ If you don't want to use `DatazillaResult` to build up the data structure to
 send, you can still use `DatazillaRequest` to send it:
 
     req = DatazillaRequest(
+        protocol="https",
         host="datazilla.mozilla.org",
         project="project",
         oauth_key="oauth-key",

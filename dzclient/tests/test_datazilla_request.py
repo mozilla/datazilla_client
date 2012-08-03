@@ -7,14 +7,16 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_init_with_date(self):
         """Can provide test date on instantiation."""
         req = DatazillaRequest(
-            'host', 'project', 'key', 'secret', test_date=12345)
+            'protocol', 'host', 'project', 'key', 'secret', test_date=12345)
 
         self.assertEqual(req.test_date, 12345)
 
 
     def test_add_datazilla_result(self):
         """Can add a DatazillaResult to a DatazillaRequest."""
-        req = DatazillaRequest('host', 'project', 'key', 'secret')
+        req = DatazillaRequest(
+            'protocol', 'host', 'project', 'key', 'secret'
+            )
         res = DatazillaResult({'suite': {'test': [1, 2, 3]}})
 
         req.add_datazilla_result(res)
@@ -24,7 +26,9 @@ class DatazillaRequestTest(unittest.TestCase):
 
     def test_add_second_datazilla_result(self):
         """Adding a second DatazillaResult joins their results."""
-        req = DatazillaRequest('host', 'project', 'key', 'secret')
+        req = DatazillaRequest(
+            'protocol', 'host', 'project', 'key', 'secret'
+            )
         res1 = DatazillaResult({'suite1': {'test': [1]}})
         res2 = DatazillaResult({'suite2': {'test': [2]}})
 
@@ -40,7 +44,9 @@ class DatazillaRequestTest(unittest.TestCase):
         collection = DatazillaResultsCollection(machine_name='localhost',
                                                 os='linux')
         test_date = collection.test_date
-        req = DatazillaRequest.create('host', 'project', 'key', 'secret', collection)
+        req = DatazillaRequest.create(
+            'protocol', 'host', 'project', 'key', 'secret', collection
+            )
         self.assertEqual(req.machine_name, 'localhost')
         self.assertEqual(req.os, 'linux')
         self.assertEqual(req.test_date, test_date)
@@ -53,6 +59,7 @@ class DatazillaRequestTest(unittest.TestCase):
         """Tests dataset creation for submission to datazilla"""
 
         req = DatazillaRequest(
+            protocol='http',
             host='host',
             project='project',
             oauth_key='key',
@@ -97,6 +104,7 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_submit(self, mock_send):
         """Submits blob of JSON data for each test suite."""
         req = DatazillaRequest(
+            protocol='http',
             host='host',
             project='project',
             oauth_key='key',
@@ -169,11 +177,12 @@ class DatazillaRequestTest(unittest.TestCase):
         mock_time.return_value = 1342229050
         mock_generate_nonce.return_value = "46810593"
 
+        protocol = 'http'
         host = "datazilla.mozilla.org"
         project = "project"
         key = "oauth-key"
         secret = "oauth-secret"
-        req = DatazillaRequest(host, project, key, secret)
+        req = DatazillaRequest(protocol, host, project, key, secret)
 
         mock_conn = mock_HTTPConnection.return_value
         mock_request = mock_conn.request
