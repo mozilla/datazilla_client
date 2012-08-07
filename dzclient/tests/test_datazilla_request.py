@@ -7,7 +7,7 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_init_with_date(self):
         """Can provide test date on instantiation."""
         req = DatazillaRequest(
-            'protocol', 'host', 'project', 'key', 'secret', test_date=12345)
+            'http', 'host', 'project', 'key', 'secret', test_date=12345)
 
         self.assertEqual(req.test_date, 12345)
 
@@ -15,7 +15,7 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_add_datazilla_result(self):
         """Can add a DatazillaResult to a DatazillaRequest."""
         req = DatazillaRequest(
-            'protocol', 'host', 'project', 'key', 'secret'
+            'http', 'host', 'project', 'key', 'secret'
             )
         res = DatazillaResult({'suite': {'test': [1, 2, 3]}})
 
@@ -27,7 +27,7 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_add_second_datazilla_result(self):
         """Adding a second DatazillaResult joins their results."""
         req = DatazillaRequest(
-            'protocol', 'host', 'project', 'key', 'secret'
+            'http', 'host', 'project', 'key', 'secret'
             )
         res1 = DatazillaResult({'suite1': {'test': [1]}})
         res2 = DatazillaResult({'suite2': {'test': [2]}})
@@ -45,7 +45,7 @@ class DatazillaRequestTest(unittest.TestCase):
                                                 os='linux')
         test_date = collection.test_date
         req = DatazillaRequest.create(
-            'protocol', 'host', 'project', 'key', 'secret', collection
+            'http', 'host', 'project', 'key', 'secret', collection
             )
         self.assertEqual(req.machine_name, 'localhost')
         self.assertEqual(req.os, 'linux')

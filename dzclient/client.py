@@ -144,6 +144,8 @@ class DatazillaRequest(DatazillaResultsCollection):
 
     """
 
+    protocols = set(['http', 'https']) # supported protocols
+
     @classmethod
     def create(cls, protocol, host, project, oauth_key,
                 oauth_secret, collection):
@@ -175,13 +177,10 @@ class DatazillaRequest(DatazillaResultsCollection):
         self.oauth_key = oauth_key
         self.oauth_secret = oauth_secret
 
-        self.protocols = set(['http', 'https'])
-
-        if protocol in self.protocols:
-            self.protocol = protocol
-        else:
-            #Default to https
-            self.protocol = 'https'
+        if protocol not in self.protocols:
+            raise AssertionError("Protocol '%s' not supported; please use one of %s" %
+                                 (protocol, ', '.join(self.protocols)))
+        self.protocol = protocol
 
         DatazillaResultsCollection.__init__(self, **kw)
 
