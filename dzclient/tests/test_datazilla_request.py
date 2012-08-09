@@ -207,5 +207,40 @@ class DatazillaRequestTest(unittest.TestCase):
             'application/x-www-form-urlencoded',
             )
 
+    @patch("dzclient.client.httplib.HTTPConnection")
+    def test_send_without_oauth(self, mock_HTTPConnection):
+        """Can send data to the server without oauth"""
+
+        protocol = 'http'
+        host = "datazilla.mozilla.org"
+        project = "project"
+        key = None
+        secret = None
+        req = DatazillaRequest(protocol, host, project, key, secret)
+
+        mock_conn = mock_HTTPConnection.return_value
+        mock_request = mock_conn.request
+        mock_response = mock_conn.getresponse.return_value
+
+        response = req.send({"some": "data"})
+
+        self.assertEqual(mock_HTTPConnection.call_count, 1)
+        self.assertEqual(mock_HTTPConnection.call_args[0][0], host)
+
+        self.assertEqual(mock_response, response)
+
+        self.assertEqual(mock_request.call_count, 1)
+
+        method, path, data, header = mock_request.call_args[0]
+        self.assertEqual(method, "POST")
+        self.assertEqual(path, "/project/api/load_test")
+        self.assertEqual(data, 'data=%257B%2522some%2522%253A%2520%2522data%2522%257D')
+
+        self.assertEqual(
+            header['Content-type'],
+            'application/x-www-form-urlencoded',
+            )
+
+
 if __name__ == '__main__':
     unittest.main()

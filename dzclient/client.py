@@ -201,37 +201,46 @@ class DatazillaRequest(DatazillaResultsCollection):
         user = self.project
 
         params = {
-            'oauth_version': "1.0",
-            'oauth_nonce': oauth.generate_nonce(),
-            'oauth_timestamp': int(time.time()),
-            'user': user,
             'data': urllib.quote(json.dumps(dataset)),
         }
 
-        #There is no requirement for the token in two-legged
-        #OAuth but we still need the token object.
-        token = oauth.Token(key="", secret="")
-        consumer = oauth.Consumer(key=self.oauth_key, secret=self.oauth_secret)
+        use_oauth = bool(self.oauth_key and self.oauth_secret)
+        if use_oauth:
 
-        params['oauth_token'] = token.key
-        params['oauth_consumer_key'] = consumer.key
+            params.update({'user': user,
+                           'oauth_version': "1.0",
+                           'oauth_nonce': oauth.generate_nonce(),
+                           'oauth_timestamp': int(time.time())})
 
-        req = oauth.Request(method="POST", url=uri, parameters=params)
 
-        #Set the signature
-        signature_method = oauth.SignatureMethod_HMAC_SHA1()
+            # There is no requirement for the token in two-legged
+            # OAuth but we still need the token object.
+            token = oauth.Token(key="", secret="")
+            consumer = oauth.Consumer(key=self.oauth_key, secret=self.oauth_secret)
 
-        #Sign the request
-        req.sign_request(signature_method, consumer, token)
+            params['oauth_token'] = token.key
+            params['oauth_consumer_key'] = consumer.key
 
-        #Build the header
+            req = oauth.Request(method="POST", url=uri, parameters=params)
+
+            # Set the signature
+            signature_method = oauth.SignatureMethod_HMAC_SHA1()
+
+            # Sign the request
+            req.sign_request(signature_method, consumer, token)
+            body = req.to_postdata()
+        else:
+            body = urllib.urlencode(params)
+
+        # Build the header
         header = {'Content-type': 'application/x-www-form-urlencoded'}
 
+        # Make the POST request
         conn = None
         if self.protocol == 'http':
             conn = httplib.HTTPConnection(self.host)
         else:
             conn = httplib.HTTPSConnection(self.host)
 
-        conn.request("POST", path, req.to_postdata(), header)
+        conn.request("POST", path, body, header)
         return conn.getresponse()
