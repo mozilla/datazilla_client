@@ -152,7 +152,8 @@ class DatazillaRequest(DatazillaResultsCollection):
         """create a DatazillaRequest instance from a results collection"""
 
         # get attributes from the collection
-        attributes = inspect.getargspec(DatazillaResultsCollection.__init__).args[1:]
+        attributes, _, _, _ = inspect.getargspec(DatazillaResultsCollection.__init__)
+        attributes = attributes[1:] # remove `self`
         kw = dict([(i, getattr(collection, i))
                    for i in attributes])
 
