@@ -222,7 +222,12 @@ class DatazillaRequest(DatazillaResultsCollection):
             params['oauth_token'] = token.key
             params['oauth_consumer_key'] = consumer.key
 
-            req = oauth.Request(method="POST", url=uri, parameters=params)
+            try:
+                req = oauth.Request(method="POST", url=uri, parameters=params)
+            except AssertionError, e:
+                print 'uri: %s' % uri
+                print 'params: %s' % params
+                raise
 
             # Set the signature
             signature_method = oauth.SignatureMethod_HMAC_SHA1()
