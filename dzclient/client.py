@@ -185,6 +185,8 @@ class DatazillaRequest(DatazillaResultsCollection):
 
         DatazillaResultsCollection.__init__(self, **kw)
 
+        # ensure the required parameters are given
+        assert self.branch, "%s: branch required for posting" % (self.__class__.__name__)
 
     def submit(self):
         """Submit test data to datazilla server, return list of responses."""
