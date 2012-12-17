@@ -7,7 +7,7 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_init_with_date(self):
         """Can provide test date on instantiation."""
         req = DatazillaRequest(
-            'http', 'host', 'project', 'key', 'secret', test_date=12345)
+            'http', 'host', 'project', 'key', 'secret', test_date=12345, branch='mozilla-try')
 
         self.assertEqual(req.test_date, 12345)
 
@@ -15,7 +15,8 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_add_datazilla_result(self):
         """Can add a DatazillaResult to a DatazillaRequest."""
         req = DatazillaRequest(
-            'http', 'host', 'project', 'key', 'secret'
+            'http', 'host', 'project', 'key', 'secret',
+            branch='mozilla-try'
             )
         res = DatazillaResult({'suite': {'test': [1, 2, 3]}})
 
@@ -27,7 +28,8 @@ class DatazillaRequestTest(unittest.TestCase):
     def test_add_second_datazilla_result(self):
         """Adding a second DatazillaResult joins their results."""
         req = DatazillaRequest(
-            'http', 'host', 'project', 'key', 'secret'
+            'http', 'host', 'project', 'key', 'secret',
+            branch='mozilla-try'
             )
         res1 = DatazillaResult({'suite1': {'test': [1]}})
         res2 = DatazillaResult({'suite2': {'test': [2]}})
@@ -42,7 +44,8 @@ class DatazillaRequestTest(unittest.TestCase):
 
     def test_create_from_results_collection(self):
         collection = DatazillaResultsCollection(machine_name='localhost',
-                                                os='linux')
+                                                os='linux',
+                                                branch='mozilla-try')
         test_date = collection.test_date
         req = DatazillaRequest.create(
             'http', 'host', 'project', 'key', 'secret', collection
@@ -182,7 +185,7 @@ class DatazillaRequestTest(unittest.TestCase):
         project = "project"
         key = "oauth-key"
         secret = "oauth-secret"
-        req = DatazillaRequest(protocol, host, project, key, secret)
+        req = DatazillaRequest(protocol, host, project, key, secret, branch='mozilla-try')
 
         mock_conn = mock_HTTPConnection.return_value
         mock_request = mock_conn.request
@@ -216,7 +219,7 @@ class DatazillaRequestTest(unittest.TestCase):
         project = "project"
         key = None
         secret = None
-        req = DatazillaRequest(protocol, host, project, key, secret)
+        req = DatazillaRequest(protocol, host, project, key, secret, branch='mozilla-try')
 
         mock_conn = mock_HTTPConnection.return_value
         mock_request = mock_conn.request
