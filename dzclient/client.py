@@ -111,7 +111,7 @@ class DatazillaResultsCollection(object):
             'test_build' : {
                 'name': self.build_name,
                 'version': self.version,
-                'revision': self.revision[:16],
+                'revision': self.revision[:50],
                 'branch': self.branch,
                 'id': self.id
             },
