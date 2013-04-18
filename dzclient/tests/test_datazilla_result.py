@@ -41,6 +41,13 @@ class DatazillaResultTest(unittest.TestCase):
         self.assertEqual(res.results_aux, {"suite": {"name": [1, 2, 3]}})
 
 
+    def test_add_xperf_results(self):
+        """Can add xperf results to a suite"""
+        res = DatazillaResult()
+        res.add_xperf_results("suite", "name", [[1, 'hello'], [2, 'world'], 3])
+        self.assertEqual(res.results_xperf, {"suite": {"name": [[1, 'hello'], [2, 'world'], 3]}})
+
+
     def test_join_results(self):
         """Can merge a full results dictionary into this result."""
         res = DatazillaResult({"suite1": {"test1a": [1]}})
