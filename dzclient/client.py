@@ -25,15 +25,17 @@ class DatazillaResult(object):
 
     Each suite may also have an options dictionary
     """
-    def __init__(self, results=None, results_aux=None, options=None):
+    def __init__(self, results=None, results_aux=None, results_xperf=None, options=None):
         self.results = results or {}
         self.results_aux = results_aux or {}
+        self.results_xperf = results_xperf or {}
         self.options = options or {}
 
-    def add_testsuite(self, suite_name, results=None, results_aux=None, options=None):
+    def add_testsuite(self, suite_name, results=None, results_aux=None, results_xperf=None, options=None):
         """Add a testsuite of {"testname":[values],...} to the results."""
         self.results[suite_name] = results or {}
         self.results_aux[suite_name] = results_aux or {}
+        self.results_xperf[suite_name] = results_xperf or {}
         self.options[suite_name] = options or {}
 
     def add_test_results(self, suite_name, test_name, values):
@@ -46,6 +48,11 @@ class DatazillaResult(object):
         suite = self.results_aux.setdefault(suite_name, {})
         suite.setdefault(results_name, []).extend(values)
 
+    def add_xperf_results(self, suite_name, results_name, values):
+        """Add auxiliary results for a test suite"""
+        suite = self.results_xperf.setdefault(suite_name, {})
+        suite.setdefault(results_name, []).extend(values)
+
     def join_results(self, results):
         """merge an existing DatazillaResult instance with this one"""
 
@@ -56,6 +63,10 @@ class DatazillaResult(object):
         for suite_name, results_aux in results.results_aux.items():
             suite = self.results_aux.setdefault(suite_name, {})
             for results_name, values in results_aux.items():
+                suite.setdefault(results_name, []).extend(values)
+        for suite_name, results_xperf in results.results_xperf.items():
+            suite = self.results_xperf.setdefault(suite_name, {})
+            for results_name, values in results_xperf.items():
                 suite.setdefault(results_name, []).extend(values)
         for suite_name, options in results.options.items():
             self.options.setdefault(suite_name, {}).update(options)
@@ -131,6 +142,9 @@ class DatazillaResultsCollection(object):
             results_aux = self.results.results_aux.get(suite)
             if results_aux:
                 dataset['results_aux'] = deepcopy(results_aux)
+            results_xperf = self.results.results_xperf.get(suite)
+            if results_xperf:
+                dataset['results_xperf'] = deepcopy(results_xperf)
             datasets.append(dataset)
 
         return datasets
