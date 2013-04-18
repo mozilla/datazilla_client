@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-version = '1.2'
+version = '1.3'
 
 deps = ['oauth2']
 
